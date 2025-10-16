@@ -1,0 +1,48 @@
+# Gradle
+.gradle
+build/
+bin/
+out/
+
+# WPILib
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+networktables.json
+*.DS_Store
+.vscode/
+.wpilib/
+
+# IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Simulation
+simulation/
+simgui*.json
+simgui-ds.json
+simgui-window.json
+
+# Logs
+*.log
+hs_err_pid*
+
+# Vendor Libraries (keep vendordeps folder but ignore downloaded libs)
+vendordeps/*.jar
+
+# Build artifacts
+*.deb
+*.rpm
+*.zip
+
+# OS specific
+Thumbs.DB
+.DS_Store
+
+# Temporary files
+*.tmp
+*.swp
+*~
