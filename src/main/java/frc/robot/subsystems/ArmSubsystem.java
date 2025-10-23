@@ -185,20 +185,48 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   /**
-   * Manual control of arm with voltage
+   * Manual control of arm with voltage (with safety limits)
    *
    * @param speed Speed from -1.0 to 1.0
    */
   public void manualArmControl(double speed) {
+    if (!m_isHomed) {
+      System.err.println("WARNING: Arm not homed! Manual control disabled for safety.");
+      return;
+    }
+
+    // Check if movement would exceed limits
+    double currentPos = getArmPosition();
+    if ((speed > 0 && currentPos >= ArmConstants.kMaxArmPosition) ||
+        (speed < 0 && currentPos <= ArmConstants.kMinArmPosition)) {
+      System.out.println("Arm limit reached! Cannot move further in that direction.");
+      m_armMotor.set(0);
+      return;
+    }
+
     m_armMotor.set(speed);
   }
 
   /**
-   * Manual control of extension with voltage
+   * Manual control of extension with voltage (with safety limits)
    *
    * @param speed Speed from -1.0 to 1.0
    */
   public void manualExtensionControl(double speed) {
+    if (!m_isHomed) {
+      System.err.println("WARNING: Arm not homed! Manual control disabled for safety.");
+      return;
+    }
+
+    // Check if movement would exceed limits
+    double currentPos = getExtensionPosition();
+    if ((speed > 0 && currentPos >= ArmConstants.kMaxExtensionPosition) ||
+        (speed < 0 && currentPos <= ArmConstants.kRetractedPosition)) {
+      System.out.println("Extension limit reached! Cannot move further in that direction.");
+      m_extensionMotor.set(0);
+      return;
+    }
+
     m_extensionMotor.set(speed);
   }
 

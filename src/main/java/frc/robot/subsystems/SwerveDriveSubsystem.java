@@ -89,7 +89,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
       try {
         Thread.sleep(1000);
         zeroHeading();
+        System.out.println("✓ Gyro calibration complete");
       } catch (Exception e) {
+        System.err.println("⚠️ ERROR: Gyro calibration failed: " + e.getMessage());
+        System.err.println("   Field-oriented drive may not work correctly!");
+        e.printStackTrace();
       }
     }).start();
   }

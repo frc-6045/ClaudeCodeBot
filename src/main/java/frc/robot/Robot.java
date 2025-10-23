@@ -30,8 +30,12 @@ public class Robot extends TimedRobot {
     // Initialize Power Distribution for monitoring
     try {
       m_pdp = new PowerDistribution();
+      System.out.println("✓ Power Distribution initialized - battery monitoring enabled");
     } catch (Exception e) {
-      System.err.println("WARNING: Could not initialize Power Distribution - voltage monitoring disabled");
+      System.err.println("⚠️ ERROR: Could not initialize Power Distribution: " + e.getMessage());
+      System.err.println("   Battery voltage and current monitoring disabled!");
+      System.err.println("   Check Power Distribution Hub connection.");
+      e.printStackTrace();
     }
   }
 
