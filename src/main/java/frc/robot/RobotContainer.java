@@ -20,7 +20,7 @@ import frc.robot.subsystems.ArmSubsystem.ArmPosition;
  */
 public class RobotContainer {
   // Subsystems
-  private final DriveSubsystem m_drive = new DriveSubsystem();
+  private final SwerveDriveSubsystem m_drive = new SwerveDriveSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
   private final ArmSubsystem m_arm = new ArmSubsystem();
   private final ClimberSubsystem m_climber = new ClimberSubsystem();
@@ -50,13 +50,16 @@ public class RobotContainer {
    * Set up default commands for subsystems
    */
   private void configureDefaultCommands() {
-    // Default drive command - arcade drive with left stick Y and right stick X
+    // Default drive command - field-oriented swerve drive
+    // Left stick: translation (forward/backward, left/right)
+    // Right stick X: rotation
     m_drive.setDefaultCommand(
-        DriveCommands.arcadeDrive(
-            m_drive,
-            () -> -applyDeadband(m_driverController.getLeftY()),
-            () -> -applyDeadband(m_driverController.getRightX())
-        )
+        m_drive.run(() -> m_drive.drive(
+            -applyDeadband(m_driverController.getLeftY()), // Forward/backward
+            -applyDeadband(m_driverController.getLeftX()), // Left/right (strafe)
+            -applyDeadband(m_driverController.getRightX()), // Rotation
+            true // Field-relative mode (robot moves relative to field, not robot orientation)
+        ))
     );
   }
 
@@ -84,19 +87,22 @@ public class RobotContainer {
     new JoystickButton(m_driverController, XboxController.Button.kX.value)
         .onTrue(IntakeCommands.stop(m_intake));
 
-    // Left bumper - Slow mode (reduce drive speed)
+    // Left bumper - Robot-relative mode (while held)
     new JoystickButton(m_driverController, XboxController.Button.kLeftBumper.value)
-        .onTrue(Commands.runOnce(() -> m_drive.setMaxOutput(0.5)))
-        .onFalse(Commands.runOnce(() -> m_drive.setMaxOutput(1.0)));
+        .whileTrue(m_drive.run(() -> m_drive.drive(
+            -applyDeadband(m_driverController.getLeftY()),
+            -applyDeadband(m_driverController.getLeftX()),
+            -applyDeadband(m_driverController.getRightX()),
+            false // Robot-relative mode
+        )));
 
-    // Right bumper - Quick turn (curvature drive)
+    // Right bumper - Reset gyro (zero heading)
     new JoystickButton(m_driverController, XboxController.Button.kRightBumper.value)
-        .whileTrue(DriveCommands.curvatureDrive(
-            m_drive,
-            () -> -applyDeadband(m_driverController.getLeftY()),
-            () -> -applyDeadband(m_driverController.getRightX()),
-            true
-        ));
+        .onTrue(Commands.runOnce(() -> m_drive.zeroHeading(), m_drive));
+
+    // Start button - Set wheels to X pattern (prevents being pushed)
+    new JoystickButton(m_driverController, XboxController.Button.kStart.value)
+        .onTrue(Commands.runOnce(() -> m_drive.setX(), m_drive));
 
     // ===== OPERATOR CONTROLS =====
 
@@ -180,7 +186,7 @@ public class RobotContainer {
   public Command getLeaveAuto() {
     return Commands.sequence(
         Commands.runOnce(() -> m_drive.resetEncoders()),
-        Commands.run(() -> m_drive.arcadeDrive(0.5, 0), m_drive)
+        Commands.run(() -> m_drive.drive(0.5, 0, 0, false), m_drive) // Drive forward
             .withTimeout(3.0),
         Commands.runOnce(() -> m_drive.stop(), m_drive)
     );
@@ -212,7 +218,7 @@ public class RobotContainer {
 
         // Drive backwards to leave community
         Commands.runOnce(() -> m_drive.resetEncoders()),
-        Commands.run(() -> m_drive.arcadeDrive(-0.5, 0), m_drive)
+        Commands.run(() -> m_drive.drive(-0.5, 0, 0, false), m_drive) // Drive backward
             .withTimeout(3.0),
         Commands.runOnce(() -> m_drive.stop(), m_drive)
     );
@@ -241,14 +247,14 @@ public class RobotContainer {
         ArmCommands.intakePosition(m_arm),
 
         // Drive to game piece
-        Commands.run(() -> m_drive.arcadeDrive(0.5, 0), m_drive)
+        Commands.run(() -> m_drive.drive(0.5, 0, 0, false), m_drive)
             .withTimeout(2.0),
 
         // Intake game piece
         IntakeCommands.intakeUntilDetected(m_intake),
 
         // Drive back
-        Commands.run(() -> m_drive.arcadeDrive(-0.5, 0), m_drive)
+        Commands.run(() -> m_drive.drive(-0.5, 0, 0, false), m_drive)
             .withTimeout(2.0),
 
         // Score second piece

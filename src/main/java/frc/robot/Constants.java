@@ -17,31 +17,76 @@ public final class Constants {
   }
 
   public static class DriveConstants {
-    // Motor CAN IDs
-    public static final int kLeftFrontMotorId = 1;
-    public static final int kLeftRearMotorId = 2;
-    public static final int kRightFrontMotorId = 3;
-    public static final int kRightRearMotorId = 4;
+    // MAXSwerve Module CAN IDs
+    // Front Left Module
+    public static final int kFrontLeftDriveMotorId = 1;
+    public static final int kFrontLeftTurningMotorId = 2;
+
+    // Front Right Module
+    public static final int kFrontRightDriveMotorId = 3;
+    public static final int kFrontRightTurningMotorId = 4;
+
+    // Back Left Module
+    public static final int kBackLeftDriveMotorId = 5;
+    public static final int kBackLeftTurningMotorId = 6;
+
+    // Back Right Module
+    public static final int kBackRightDriveMotorId = 7;
+    public static final int kBackRightTurningMotorId = 8;
+
+    // MAXSwerve physical characteristics
+    public static final double kWheelDiameterMeters = 0.0762; // 3 inches = 0.0762 meters
+    public static final double kDriveGearRatio = 4.71; // L3 gear ratio (fast MAXSwerve)
+    public static final double kTurnGearRatio = 9424.0 / 203.0; // MAXSwerve turning ratio
+
+    // Drivetrain dimensions (MEASURE YOUR ROBOT!)
+    // Distance from robot center to module (front-back)
+    public static final double kWheelBaseMeters = 0.5715; // 22.5 inches - ADJUST THIS!
+    // Distance from robot center to module (left-right)
+    public static final double kTrackWidthMeters = 0.5715; // 22.5 inches - ADJUST THIS!
 
     // Drive characteristics
-    public static final double kMaxSpeedMetersPerSecond = 4.0;
+    // Theoretical free speed: (6784 RPM * wheel circumference) / (60 * gear ratio) = 5.6 m/s
+    public static final double kMaxSpeedMetersPerSecond = 5.6; // NEO Vortex theoretical max with L3
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
-    // Distance between left and right wheels
-    public static final double kTrackWidthMeters = 0.6;
+    // Motor inversions - TUNE THESE for your robot
+    public static final boolean kFrontLeftDriveInverted = false;
+    public static final boolean kFrontRightDriveInverted = false;
+    public static final boolean kBackLeftDriveInverted = false;
+    public static final boolean kBackRightDriveInverted = false;
 
-    // Motor inversion
-    public static final boolean kLeftMotorsInverted = false;
-    public static final boolean kRightMotorsInverted = true;
+    public static final boolean kFrontLeftTurningInverted = true;
+    public static final boolean kFrontRightTurningInverted = true;
+    public static final boolean kBackLeftTurningInverted = true;
+    public static final boolean kBackRightTurningInverted = true;
+
+    // Absolute encoder offsets (radians) - MUST CALIBRATE!
+    // Point all wheels forward, read encoder values, put negative of those values here
+    public static final double kFrontLeftEncoderOffset = 0.0; // CALIBRATE ME!
+    public static final double kFrontRightEncoderOffset = 0.0; // CALIBRATE ME!
+    public static final double kBackLeftEncoderOffset = 0.0; // CALIBRATE ME!
+    public static final double kBackRightEncoderOffset = 0.0; // CALIBRATE ME!
+
+    // PID constants for turning motors
+    public static final double kTurningP = 1.0;
+    public static final double kTurningI = 0.0;
+    public static final double kTurningD = 0.0;
 
     // Current limits
-    public static final int kCurrentLimit = 40;
+    public static final int kDriveCurrentLimit = 50; // NEO Vortex can handle more
+    public static final int kTurningCurrentLimit = 30; // NEO 550
+
+    // Slew rate limiters (prevent tipping)
+    public static final double kDirectionSlewRate = 1.2; // radians per second
+    public static final double kMagnitudeSlewRate = 1.8; // percent per second (1.8 = 0 to 100% in 0.56s)
+    public static final double kRotationalSlewRate = 2.0; // percent per second
   }
 
   public static class IntakeConstants {
-    // Motor CAN IDs
-    public static final int kIntakeMotorId = 5;
-    public static final int kIntakeRollerMotorId = 6;
+    // Motor CAN IDs (adjusted for swerve drive using IDs 1-8)
+    public static final int kIntakeMotorId = 9;
+    public static final int kIntakeRollerMotorId = 10;
 
     // Intake speeds
     public static final double kIntakeSpeed = 0.75;
@@ -56,9 +101,9 @@ public final class Constants {
   }
 
   public static class ArmConstants {
-    // Motor CAN IDs
-    public static final int kArmMotorId = 7;
-    public static final int kExtensionMotorId = 8;
+    // Motor CAN IDs (adjusted for swerve drive using IDs 1-8)
+    public static final int kArmMotorId = 11;
+    public static final int kExtensionMotorId = 12;
 
     // Arm positions (encoder ticks) - THESE NEED TO BE TUNED FOR YOUR ROBOT!
     public static final double kStowedPosition = 0;
@@ -100,9 +145,9 @@ public final class Constants {
   }
 
   public static class ClimberConstants {
-    // Motor CAN IDs
-    public static final int kLeftClimberMotorId = 9;
-    public static final int kRightClimberMotorId = 10;
+    // Motor CAN IDs (adjusted for swerve drive using IDs 1-8)
+    public static final int kLeftClimberMotorId = 13;
+    public static final int kRightClimberMotorId = 14;
 
     // Climber positions
     public static final double kRetractedPosition = 0;
