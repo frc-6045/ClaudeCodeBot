@@ -161,6 +161,11 @@ public final class Constants {
     public static final double kClimbSpeed = 0.8;
     public static final double kDescendSpeed = -0.5;
 
+    // PID constants for climber position control - MUST BE TUNED!
+    public static final double kClimberP = 0.1;
+    public static final double kClimberI = 0.0;
+    public static final double kClimberD = 0.0;
+
     // Current limits
     public static final int kCurrentLimit = 60;
   }

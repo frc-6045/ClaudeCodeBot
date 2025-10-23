@@ -48,9 +48,31 @@ public class ClimberSubsystem extends SubsystemBase {
     m_leftPIDController = m_leftClimber.getPIDController();
     m_rightPIDController = m_rightClimber.getPIDController();
 
+    // Configure PID for left climber
+    m_leftPIDController.setP(ClimberConstants.kClimberP);
+    m_leftPIDController.setI(ClimberConstants.kClimberI);
+    m_leftPIDController.setD(ClimberConstants.kClimberD);
+
+    // Configure PID for right climber
+    m_rightPIDController.setP(ClimberConstants.kClimberP);
+    m_rightPIDController.setI(ClimberConstants.kClimberI);
+    m_rightPIDController.setD(ClimberConstants.kClimberD);
+
     // Set current limits (higher for climbing)
     m_leftClimber.setSmartCurrentLimit(ClimberConstants.kCurrentLimit);
     m_rightClimber.setSmartCurrentLimit(ClimberConstants.kCurrentLimit);
+
+    // Enable voltage compensation for consistent behavior
+    m_leftClimber.enableVoltageCompensation(12.0);
+    m_rightClimber.enableVoltageCompensation(12.0);
+
+    // Set idle mode to brake for safety
+    m_leftClimber.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    m_rightClimber.setIdleMode(CANSparkMax.IdleMode.kBrake);
+
+    // Set CAN timeout for safety (motors will stop if no signal for 100ms)
+    m_leftClimber.setCANTimeout(100);
+    m_rightClimber.setCANTimeout(100);
 
     // Burn flash to save configuration
     m_leftClimber.burnFlash();

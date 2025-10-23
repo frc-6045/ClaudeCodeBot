@@ -135,12 +135,17 @@ All telemetry published to SmartDashboard for debugging
 
 **Solution**: Add JUnit tests for command logic
 
-### 13. Hard-Coded Controller Ports
-**Problem**: If controllers swap ports, controls break
+### 13. ✅ FIXED - Hard-Coded Controller Ports
+**Status**: FIXED
 
-**Impact**: Confusing during competition
+**Solution Applied**:
+- Controller connection validation added to RobotContainer
+- Warns if driver or operator controller not detected
+- Detects if controllers are swapped (common issue)
+- Connection status published to SmartDashboard
+- Clear console messages guide troubleshooting
 
-**Solution**: Add port checking or dynamic assignment
+**Impact**: Prevents confusing control issues during competition
 
 ### 14. ✅ FIXED - Brownout Protection
 **Status**: FIXED

@@ -44,6 +44,18 @@ public class IntakeSubsystem extends SubsystemBase {
     m_intakeMotor.setSmartCurrentLimit(IntakeConstants.kCurrentLimit);
     m_rollerMotor.setSmartCurrentLimit(IntakeConstants.kCurrentLimit);
 
+    // Enable voltage compensation for consistent behavior
+    m_intakeMotor.enableVoltageCompensation(12.0);
+    m_rollerMotor.enableVoltageCompensation(12.0);
+
+    // Set idle mode to brake for safety
+    m_intakeMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+    m_rollerMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+
+    // Set CAN timeout for safety (motors will stop if no signal for 100ms)
+    m_intakeMotor.setCANTimeout(100);
+    m_rollerMotor.setCANTimeout(100);
+
     // Burn flash to save configuration
     m_intakeMotor.burnFlash();
     m_rollerMotor.burnFlash();

@@ -313,7 +313,15 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
+    Command selectedCommand = m_autoChooser.getSelected();
+
+    // Null safety check - return safe default if chooser fails
+    if (selectedCommand == null) {
+      System.err.println("⚠️ WARNING: Auto chooser returned null! Using 'Do Nothing' as fallback.");
+      return Commands.none();
+    }
+
+    return selectedCommand;
   }
 
   /**
