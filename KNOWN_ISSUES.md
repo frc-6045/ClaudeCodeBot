@@ -63,36 +63,31 @@ This document lists known issues, limitations, and things that could break with 
 
 ---
 
-## MEDIUM Priority - Should Fix
+## MEDIUM Priority - Optional Improvements
 
-### 4. Simple Time-Based Autonomous
-**Problem**: Autonomous routines use only timers, no sensor feedback
+### 4. ✅ FIXED - Time-Based Autonomous Replaced with Encoder Feedback
+**Status**: FIXED
 
-**Impact**: Unreliable scoring, can't adapt to field conditions
+**What was improved**:
+- Created `DriveDistance` command that uses swerve encoders
+- All autonomous routines now use encoder-based driving
+- Much more reliable than time-based commands
+- Auto routines use arm position feedback
 
-**Solution**:
-- Add encoder-based drive commands (distance instead of time)
-- Use arm position feedback to confirm movements
-- Consider adding vision targeting
-
-**Files to modify**: [RobotContainer.java](src/main/java/frc/robot/RobotContainer.java)
+**Note**: Distances (3m, 2m) are estimates and may need adjustment based on field testing
 
 ---
 
-### 5. Autonomous Arm Homing Uses Timeout
-**Problem**: AutoHomeArm command uses 5-second timeout instead of current detection
+### 5. ✅ FIXED - Autonomous Arm Homing Now Uses Current Detection
+**Status**: FIXED
 
-**Impact**: Less reliable homing, could timeout too early or too late
+**What was improved**:
+- AutoHomeArm now monitors motor current to detect hard stop
+- 5-cycle confirmation (100ms) prevents false positives
+- Still has 5-second timeout as safety fallback
+- More reliable than pure timeout method
 
-**Current Status**: PARTIALLY FIXED
-- Command exists and works with timeout
-- Telemetry shows homing status
-
-**Improvement Available**:
-- Could use current spike detection (infrastructure exists)
-- Would be more reliable than timeout method
-
-**File**: [AutoHomeArm.java](src/main/java/frc/robot/commands/AutoHomeArm.java)
+**Note**: Current threshold (15A) may need tuning based on your arm's mechanical resistance
 
 ---
 
