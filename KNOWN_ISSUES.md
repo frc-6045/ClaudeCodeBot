@@ -74,19 +74,26 @@ This document lists known issues, limitations, and things that could break with 
 
 ## Medium Issues
 
-### 7. No Battery Voltage Compensation in Drive
-**Problem**: Drive speed varies with battery voltage (12V vs 10V)
+### 7. ✅ FIXED - Battery Voltage Compensation in Drive
+**Status**: FIXED
 
-**Impact**: Inconsistent autonomous, harder to control
+**Solution Applied**:
+- Voltage compensation enabled on all swerve drive and turning motors
+- Set to 12.0V nominal voltage
+- Ensures consistent performance regardless of battery charge level
 
-**Mitigation**: Voltage compensation is enabled on arm/intake, but not drive
+**Impact**: Drive speed now consistent throughout match
 
-### 8. No Ramp Rate Limiting on Drive
-**Problem**: Full throttle can cause wheel slip or tip the robot
+### 8. ✅ FIXED - Ramp Rate Limiting on Drive
+**Status**: FIXED
 
-**Impact**: Harder to control, potential for tipping
+**Solution Applied**:
+- SlewRateLimiters implemented in SwerveDriveSubsystem
+- Magnitude slew rate: 1.8 (0 to 100% in 0.56s)
+- Rotational slew rate: 2.0
+- Prevents wheel slip and tipping during aggressive inputs
 
-**Solution**: Add ramp rate limiting in DriveSubsystem if needed
+**Impact**: Smooth, controlled acceleration
 
 ### 9. No Current Spike Detection
 **Problem**: Can't detect if mechanism is jammed

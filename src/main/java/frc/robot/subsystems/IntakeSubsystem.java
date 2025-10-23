@@ -21,6 +21,12 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private IntakeState m_currentState = IntakeState.STOPPED;
 
+  // Current spike detection for jammed mechanisms
+  private static final double CURRENT_SPIKE_THRESHOLD = 25.0; // Amps (lower for intake)
+  private static final int CURRENT_SPIKE_DURATION = 10; // Periodic cycles (~200ms at 20ms per cycle)
+  private int m_intakeCurrentSpikeCounter = 0;
+  private int m_rollerCurrentSpikeCounter = 0;
+
   public enum IntakeState {
     INTAKING,
     OUTTAKING,
@@ -115,8 +121,42 @@ public class IntakeSubsystem extends SubsystemBase {
       hold();
     }
 
+    // Current spike detection - detect jammed mechanisms
+    double intakeCurrent = m_intakeMotor.getOutputCurrent();
+    double rollerCurrent = m_rollerMotor.getOutputCurrent();
+
+    // Intake motor current spike detection
+    if (intakeCurrent > CURRENT_SPIKE_THRESHOLD) {
+      m_intakeCurrentSpikeCounter++;
+      if (m_intakeCurrentSpikeCounter >= CURRENT_SPIKE_DURATION) {
+        System.err.println("⚠️ WARNING: Intake motor current spike detected! Possible jam or overload.");
+        System.err.println("Current: " + intakeCurrent + "A (threshold: " + CURRENT_SPIKE_THRESHOLD + "A)");
+        // Stop the intake motor to prevent damage
+        m_intakeMotor.set(0);
+        m_intakeCurrentSpikeCounter = 0; // Reset counter
+      }
+    } else {
+      m_intakeCurrentSpikeCounter = 0; // Reset if current drops
+    }
+
+    // Roller motor current spike detection
+    if (rollerCurrent > CURRENT_SPIKE_THRESHOLD) {
+      m_rollerCurrentSpikeCounter++;
+      if (m_rollerCurrentSpikeCounter >= CURRENT_SPIKE_DURATION) {
+        System.err.println("⚠️ WARNING: Roller motor current spike detected! Possible jam or overload.");
+        System.err.println("Current: " + rollerCurrent + "A (threshold: " + CURRENT_SPIKE_THRESHOLD + "A)");
+        // Stop the roller motor to prevent damage
+        m_rollerMotor.set(0);
+        m_rollerCurrentSpikeCounter = 0; // Reset counter
+      }
+    } else {
+      m_rollerCurrentSpikeCounter = 0; // Reset if current drops
+    }
+
     // Telemetry
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Intake/Has Game Piece", hasGamePiece());
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Intake/State", m_currentState.name());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Intake/Intake Current", intakeCurrent);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Intake/Roller Current", rollerCurrent);
   }
 }

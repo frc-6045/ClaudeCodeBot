@@ -28,6 +28,12 @@ public class ArmSubsystem extends SubsystemBase {
   private ArmPosition m_targetPosition = ArmPosition.STOWED;
   private boolean m_isHomed = false;
 
+  // Current spike detection for jammed mechanisms
+  private static final double CURRENT_SPIKE_THRESHOLD = 35.0; // Amps
+  private static final int CURRENT_SPIKE_DURATION = 10; // Periodic cycles (~200ms at 20ms per cycle)
+  private int m_armCurrentSpikeCounter = 0;
+  private int m_extensionCurrentSpikeCounter = 0;
+
   public enum ArmPosition {
     STOWED(ArmConstants.kStowedPosition, ArmConstants.kRetractedPosition),
     INTAKE(ArmConstants.kIntakePosition, ArmConstants.kRetractedPosition),
@@ -340,11 +346,45 @@ public class ArmSubsystem extends SubsystemBase {
       stop();
     }
 
+    // Current spike detection - detect jammed mechanisms
+    double armCurrent = m_armMotor.getOutputCurrent();
+    double extensionCurrent = m_extensionMotor.getOutputCurrent();
+
+    // Arm motor current spike detection
+    if (armCurrent > CURRENT_SPIKE_THRESHOLD) {
+      m_armCurrentSpikeCounter++;
+      if (m_armCurrentSpikeCounter >= CURRENT_SPIKE_DURATION) {
+        System.err.println("⚠️ WARNING: Arm motor current spike detected! Possible jam or overload.");
+        System.err.println("Current: " + armCurrent + "A (threshold: " + CURRENT_SPIKE_THRESHOLD + "A)");
+        // Stop the arm motor to prevent damage
+        m_armMotor.set(0);
+        m_armCurrentSpikeCounter = 0; // Reset counter
+      }
+    } else {
+      m_armCurrentSpikeCounter = 0; // Reset if current drops
+    }
+
+    // Extension motor current spike detection
+    if (extensionCurrent > CURRENT_SPIKE_THRESHOLD) {
+      m_extensionCurrentSpikeCounter++;
+      if (m_extensionCurrentSpikeCounter >= CURRENT_SPIKE_DURATION) {
+        System.err.println("⚠️ WARNING: Extension motor current spike detected! Possible jam or overload.");
+        System.err.println("Current: " + extensionCurrent + "A (threshold: " + CURRENT_SPIKE_THRESHOLD + "A)");
+        // Stop the extension motor to prevent damage
+        m_extensionMotor.set(0);
+        m_extensionCurrentSpikeCounter = 0; // Reset counter
+      }
+    } else {
+      m_extensionCurrentSpikeCounter = 0; // Reset if current drops
+    }
+
     // Telemetry
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Angle Position", getArmPosition());
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Extension Position", getExtensionPosition());
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Arm/Is Homed", m_isHomed);
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Arm/Within Limits", isWithinLimits());
     edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Arm/Target Position", m_targetPosition.name());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Arm Current", armCurrent);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Extension Current", extensionCurrent);
   }
 }
