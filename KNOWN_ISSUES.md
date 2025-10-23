@@ -2,192 +2,149 @@
 
 This document lists known issues, limitations, and things that could break with the robot code.
 
-## ✅ FIXED Issues
+**Note**: All critical safety and configuration issues have been fixed. See [CODE_REVIEW_FINDINGS.md](CODE_REVIEW_FINDINGS.md) for details on what was fixed.
 
-### 1. ✅ FIXED - Autonomous Arm Homing
-**Status**: PARTIALLY FIXED
+---
 
-**Solution Applied**:
-- Added `AutoHomeArm` command that can run at start of autonomous
-- Added warnings in autonomous routines if arm not homed
-- Telemetry added to show homing status on dashboard
+## ⚠️ HIGH Priority - Must Fix Before Competition
 
-**Remaining Limitation**:
-- Auto-home uses timeout method (needs testing)
-- For best results: Add absolute encoders or limit switches
-- Or manually home in teleop before autonomous
-
-### 2. ✅ FIXED - Gradle Wrapper JAR
-**Status**: FIXED
-
-**Solution**:
-- gradle-wrapper.jar now included in gradle/wrapper/
-- `./gradlew` commands will now work
-- Fixed settings.gradle compatibility issue
-
-### 3. ✅ FIXED - CAN Timeout Protection
-**Status**: FIXED
-
-**Solution Applied**:
-- All motor controllers now have `setCANTimeout(100)` configured
-- Motors will stop if no CAN signal for 100ms
-- Built-in SPARK MAX safety features activated
-
-### 4. ⚠️ PID Values Are Placeholders
+### 1. PID Values Are Placeholders
 **Impact**: HIGH - Robot will not perform well
 
 **Problem**:
 - All PID constants are set to default/placeholder values
 - Arm will likely oscillate or not reach targets properly
+- Climber PID also needs tuning
 - These MUST be tuned for your specific robot
 
 **Solution**:
 - Follow [TUNING_GUIDE.md](TUNING_GUIDE.md) carefully
 - Start with small P values and increase gradually
 - Test in safe environment before competition
+- Update Constants.java with tuned values
 
-### 5. ⚠️ Position Setpoints Are Arbitrary
+**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java)
+
+---
+
+### 2. Position Setpoints Are Arbitrary
 **Impact**: HIGH - Arm movements won't work correctly
 
 **Problem**:
 - Encoder values for scoring positions are made up
 - Your robot's geometry will be different
 - Arm could move to wrong positions or crash into itself
+- Swerve module offsets need calibration
 
 **Solution**:
 - Manually move arm to each position
 - Record actual encoder values from dashboard
 - Update Constants.java with real values
+- Follow [SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md) for swerve
 
-### 6. ⚠️ No Collision Detection
-**Impact**: MEDIUM - Arm could hit frame
+**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java)
+
+---
+
+### 3. Swerve Encoder Offsets Must Be Calibrated
+**Impact**: HIGH - Drive will not work correctly
 
 **Problem**:
-- Software limits are single-axis (arm angle, extension)
-- No protection against arm hitting the robot frame when extended
-- No "keep-out zones" for dangerous configurations
+- Swerve module encoder offsets are set to 0.0
+- Wheels will not point in correct directions
+- Robot will not drive straight
 
-**Solution** (for future):
-- Add compound limit checks (e.g., "if extended, limit arm angle")
-- Calculate arm tip position and check against frame geometry
-- Use 2D kinematics to enforce safe workspace
+**Solution**:
+- Follow [SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md) step-by-step
+- Physically align wheels, measure offsets
+- Update Constants.DriveConstants encoder offset values
 
-## Medium Issues
+**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java)
 
-### 7. ✅ FIXED - Battery Voltage Compensation in Drive
-**Status**: FIXED
+---
 
-**Solution Applied**:
-- Voltage compensation enabled on all swerve drive and turning motors
-- Set to 12.0V nominal voltage
-- Ensures consistent performance regardless of battery charge level
+## MEDIUM Priority - Should Fix
 
-**Impact**: Drive speed now consistent throughout match
-
-### 8. ✅ FIXED - Ramp Rate Limiting on Drive
-**Status**: FIXED
-
-**Solution Applied**:
-- SlewRateLimiters implemented in SwerveDriveSubsystem
-- Magnitude slew rate: 1.8 (0 to 100% in 0.56s)
-- Rotational slew rate: 2.0
-- Prevents wheel slip and tipping during aggressive inputs
-
-**Impact**: Smooth, controlled acceleration
-
-### 9. ✅ FIXED - Current Spike Detection
-**Status**: FIXED
-
-**Solution Applied**:
-- Current monitoring added to ArmSubsystem (arm & extension motors)
-- Current monitoring added to IntakeSubsystem (intake & roller motors)
-- Threshold: 35A for arm, 25A for intake
-- Duration filter: 10 cycles (~200ms) to avoid false positives
-- Motors automatically stop when sustained current spike detected
-- Current values published to SmartDashboard for monitoring
-
-**Impact**: Prevents motor burnout from jammed mechanisms
-
-### 10. Simple Time-Based Autonomous
+### 4. Simple Time-Based Autonomous
 **Problem**: Autonomous routines use only timers, no sensor feedback
 
 **Impact**: Unreliable scoring, can't adapt to field conditions
 
-**Solution**: Add sensor feedback (encoders, vision, etc.) for robust auto
+**Solution**:
+- Add encoder-based drive commands (distance instead of time)
+- Use arm position feedback to confirm movements
+- Consider adding vision targeting
 
-## Minor Issues
+**Files to modify**: [RobotContainer.java](src/main/java/frc/robot/RobotContainer.java)
 
-### 11. ✅ FIXED - Telemetry/Logging
-**Status**: FIXED
+---
 
-**Solution Applied**:
-- Swerve: Gyro angle, robot position, gyro connection status
-- Arm: Position, homing status, limits, target position
-- Intake: Game piece detection, state
-- Robot: Battery voltage, total current draw, brownout warnings
+### 5. Autonomous Arm Homing Uses Timeout
+**Problem**: AutoHomeArm command uses 5-second timeout instead of current detection
 
-All telemetry published to SmartDashboard for debugging
+**Impact**: Less reliable homing, could timeout too early or too late
 
-### 12. No Unit Tests
+**Current Status**: PARTIALLY FIXED
+- Command exists and works with timeout
+- Telemetry shows homing status
+
+**Improvement Available**:
+- Could use current spike detection (infrastructure exists)
+- Would be more reliable than timeout method
+
+**File**: [AutoHomeArm.java](src/main/java/frc/robot/commands/AutoHomeArm.java)
+
+---
+
+## LOW Priority - Nice to Have
+
+### 6. No Unit Tests
 **Problem**: No automated testing of robot code
 
 **Impact**: Harder to catch bugs before deployment
 
 **Solution**: Add JUnit tests for command logic
 
-### 13. ✅ FIXED - Hard-Coded Controller Ports
-**Status**: FIXED
+---
 
-**Solution Applied**:
-- Controller connection validation added to RobotContainer
-- Warns if driver or operator controller not detected
-- Detects if controllers are swapped (common issue)
-- Connection status published to SmartDashboard
-- Clear console messages guide troubleshooting
-
-**Impact**: Prevents confusing control issues during competition
-
-### 14. ✅ FIXED - Brownout Protection
-**Status**: FIXED
-
-**Solution Applied**:
-- Battery voltage monitoring in Robot.periodic()
-- Warning at <11.5V, critical warning at <10.5V
-- Dashboard indicator for low battery
-- Total current draw monitoring via Power Distribution
-- Console warnings when brownout risk detected
-
-## Limitations by Design
-
-### 15. ✅ IMPLEMENTED - Swerve Drive
-**Status**: IMPLEMENTED
-
-**Current Implementation**:
-- REV MAXSwerve modules with field-oriented control
-- NavX gyroscope for heading
-- Requires encoder calibration (see SWERVE_CALIBRATION.md)
-- L3 gearing for speed
-
-### 16. No Vision Targeting
+### 7. No Vision Targeting
 **Problem**: No Limelight integration for auto-aiming
 
-**Impact**: Manual alignment required
+**Impact**: Manual alignment required for scoring
 
-**Note**: Limelight constants exist but not implemented
+**Note**: Limelight constants exist in Constants.java but not implemented
 
-### 17. No Path Following
+---
+
+### 8. No Path Following
 **Problem**: Can't follow complex autonomous paths
 
-**Impact**: Simple autonomous only
+**Impact**: Limited to simple autonomous routines
 
 **Note**: Would require PathPlanner or Trajectory integration
 
-### 18. Manual Homing Only
-**Problem**: Arm must be homed by operator every boot
+---
+
+### 9. Manual Homing Required Every Boot
+**Problem**: Arm must be homed by operator every time robot boots
 
 **Impact**: Extra step before each match
 
-**Note**: Would require absolute encoders to fix properly
+**Note**: Would require absolute encoders (e.g., CTRE CANcoder) to fix properly
+
+---
+
+## Limitations by Design
+
+These are not bugs, but architectural limitations:
+
+- **Relative encoders only**: Arm position lost on reboot (requires manual homing)
+- **No vision processing**: Manual aiming required
+- **Simple autonomous**: Time-based commands only
+- **No auto-balance**: Would require gyro pitch/roll sensing
+- **Single-piece capacity**: Intake can only hold one coral at a time
+
+---
 
 ## Things That Will Definitely Break If...
 
@@ -196,6 +153,8 @@ All telemetry published to SmartDashboard for debugging
 ❌ **PID values aren't tuned** → Arm oscillates violently or doesn't move
 
 ❌ **Position values aren't calibrated** → Arm goes to wrong places
+
+❌ **Swerve offsets aren't calibrated** → Robot won't drive straight
 
 ❌ **Motor inversions are wrong** → Robot drives backward, intake ejects instead
 
@@ -211,24 +170,34 @@ All telemetry published to SmartDashboard for debugging
 
 ❌ **You deploy without building first** → Old code runs, confusing behavior
 
+---
+
 ## Pre-Competition Checklist
 
 Use this to avoid most of the above issues:
 
-- [ ] Arm has been homed in Teleop before running Auto
-- [ ] All PID values have been tuned
-- [ ] All position setpoints have been calibrated
-- [ ] Motor inversions verified (robot drives forward when commanded forward)
+### Critical (Must Do)
+- [ ] **Swerve encoder offsets calibrated** (SWERVE_CALIBRATION.md)
+- [ ] **All PID values tuned** (TUNING_GUIDE.md)
+- [ ] **All position setpoints calibrated** (record from dashboard)
+- [ ] **Arm homed in Teleop before running Auto**
+- [ ] **Battery fully charged** (>12.5V)
+
+### Important (Should Do)
+- [ ] Motor inversions verified (drives forward when commanded forward)
 - [ ] All CAN IDs verified (each motor responds correctly)
-- [ ] Battery fully charged (>12.5V)
 - [ ] Current limits tested (no brownouts during full operation)
 - [ ] All autonomous routines tested in practice
-- [ ] CAN bus wiring checked (all connections tight)
-- [ ] Latest code deployed (check timestamp in Driver Station)
 - [ ] Controllers paired and ports verified
 - [ ] Beam break sensor working (test with object)
+
+### Safety (Always Do)
+- [ ] CAN bus wiring checked (all connections tight)
+- [ ] Latest code deployed (check timestamp in Driver Station)
 - [ ] All mechanical hard stops in place
 - [ ] Safety glasses on for testing! 👓
+
+---
 
 ## When Things Go Wrong
 
@@ -236,39 +205,79 @@ Use this to avoid most of the above issues:
 - Check battery voltage (must be >7V)
 - Check for code errors in Driver Station console
 - Verify RoboRIO has power light
+- Check controller connections (both driver and operator)
 
 ### Motors don't work
 - Check CAN bus (green lights on SPARK MAX?)
 - Verify motor controllers are powered
 - Check for CAN errors in Driver Station
+- Verify CAN IDs match Constants.java
 
 ### Arm oscillates wildly
 - **DISABLE IMMEDIATELY**
 - P value is too high
 - Decrease kArmP by 50% and retry
+- Follow tuning guide carefully
 
 ### Robot brownouts
 - Lower current limits in Constants.java
 - Charge battery fully
 - Don't run too many motors at once
+- Check battery connections
 
 ### Encoder values reset randomly
 - Check CAN wiring (loose connections)
 - Home the arm again
 - May need better wire management
+- Verify SPARK MAX firmware is up to date
+
+### Swerve drives weird / won't go straight
+- Calibrate encoder offsets (SWERVE_CALIBRATION.md)
+- Check wheel inversions in Constants.java
+- Verify gyro is working (check dashboard)
+- Zero gyro heading with right bumper
+
+### Controllers don't work
+- Check dashboard for connection warnings
+- Verify correct USB ports (0 = driver, 1 = operator)
+- Re-pair controllers with Driver Station
+- Check for controller swap message in console
+
+---
 
 ## Getting Help
 
 If you encounter an issue not listed here:
 1. Check Driver Station console for error messages
 2. Enable message logging in DriverStation
-3. Review WPILib documentation
-4. Post on Chief Delphi (cd.chiefdelphi.com)
-5. Contact FIRST technical support
+3. Check SmartDashboard for telemetry data
+4. Review WPILib documentation
+5. Post on Chief Delphi (cd.chiefdelphi.com)
+6. Contact FIRST technical support
+
+---
+
+## What's Already Fixed ✅
+
+All critical safety and configuration issues have been resolved:
+- ✅ All 14 motor controllers properly configured (CAN timeout, voltage comp, brake mode)
+- ✅ Current spike detection (prevents motor burnout)
+- ✅ Collision detection for arm (prevents frame crashes)
+- ✅ Brownout protection (battery monitoring)
+- ✅ Controller validation (warns if disconnected/swapped)
+- ✅ Exception handling (detailed error messages)
+- ✅ Manual arm control safety limits
+- ✅ Null pointer safety in autonomous
+- ✅ Comprehensive telemetry
+
+See [CODE_REVIEW_FINDINGS.md](CODE_REVIEW_FINDINGS.md) for complete list of fixes.
+
+---
 
 ## Contributing
 
 If you fix any of these issues, please:
 1. Document the fix
 2. Update this file
-3. Share with the community!
+3. Update CODE_REVIEW_FINDINGS.md if applicable
+4. Share with the community!
