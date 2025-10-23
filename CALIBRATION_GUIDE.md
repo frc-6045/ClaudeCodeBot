@@ -51,6 +51,28 @@ This guide walks you through all calibration steps needed before your robot is c
 
 ### Step 2: Record Actual Positions
 
+**🎉 NEW: Built-in Calibration Helper!**
+
+The robot now has a **RecordArmPosition** command that makes this easy:
+
+1. Manually move arm to desired position
+2. Press **Operator D-Pad Left**
+3. Check console output - it prints the Constants.java code for you!
+4. Copy and paste into Constants.java
+
+**Example output**:
+```
+==================================================
+📍 POSITION RECORDED: CURRENT
+==================================================
+Arm Angle:  152.34 encoder ticks
+Extension:  0.00 encoder ticks
+
+Add to Constants.java:
+public static final double kCURRENTPosition = 152.34;
+==================================================
+```
+
 For each scoring position, follow these steps:
 
 **STOWED Position:**

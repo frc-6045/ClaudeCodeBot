@@ -57,6 +57,40 @@ MAXSwerve modules use relative encoders, which means they don't know their absol
 
 #### Step 2: Read Encoder Values
 
+**🎉 NEW: Built-in Calibration Helper!**
+
+The robot now has a **PrintSwerveOffsets** command that makes this super easy:
+
+1. Deploy the code to the robot
+2. Enable robot in **Teleop** mode
+3. **Press Driver Back Button**
+4. Check the console output - it prints ready-to-use Constants.java code!
+
+**Example console output**:
+```
+==================================================
+🔧 SWERVE MODULE CALIBRATION
+==================================================
+Make sure all wheels are pointing STRAIGHT FORWARD!
+
+Current turning encoder positions (radians):
+  Front Left:  0.1234
+  Front Right: 0.5678
+  Back Left:   0.9012
+  Back Right:  0.3456
+
+Add these to Constants.DriveConstants:
+  public static final double kFrontLeftEncoderOffset = 0.1234;
+  public static final double kFrontRightEncoderOffset = 0.5678;
+  public static final double kBackLeftEncoderOffset = 0.9012;
+  public static final double kBackRightEncoderOffset = 0.3456;
+==================================================
+```
+
+Just copy-paste those lines into Constants.java!
+
+**Alternative (Manual Method)**:
+
 1. Deploy the code to the robot
 2. Enable robot in **Teleop** mode
 3. Open **SmartDashboard** or **Shuffleboard**
