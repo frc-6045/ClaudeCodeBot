@@ -36,6 +36,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Validate controller connections
+    validateControllers();
+
     // Configure the trigger bindings
     configureBindings();
 
@@ -44,6 +47,43 @@ public class RobotContainer {
 
     // Configure autonomous chooser
     configureAutoChooser();
+  }
+
+  /**
+   * Validate that controllers are connected and warn if not
+   */
+  private void validateControllers() {
+    // Check driver controller
+    if (!m_driverController.isConnected()) {
+      System.err.println("⚠️ WARNING: Driver controller not detected on port " +
+                         OperatorConstants.kDriverControllerPort);
+      System.err.println("   Check controller connection and port assignment!");
+      SmartDashboard.putBoolean("Driver Controller Connected", false);
+    } else {
+      System.out.println("✓ Driver controller connected on port " +
+                         OperatorConstants.kDriverControllerPort);
+      SmartDashboard.putBoolean("Driver Controller Connected", true);
+    }
+
+    // Check operator controller
+    if (!m_operatorController.isConnected()) {
+      System.err.println("⚠️ WARNING: Operator controller not detected on port " +
+                         OperatorConstants.kOperatorControllerPort);
+      System.err.println("   Check controller connection and port assignment!");
+      SmartDashboard.putBoolean("Operator Controller Connected", false);
+    } else {
+      System.out.println("✓ Operator controller connected on port " +
+                         OperatorConstants.kOperatorControllerPort);
+      SmartDashboard.putBoolean("Operator Controller Connected", true);
+    }
+
+    // If controllers appear to be swapped (common issue)
+    if (!m_driverController.isConnected() && m_operatorController.isConnected()) {
+      System.err.println("⚠️ HINT: Only operator controller detected. Controllers may be swapped!");
+    }
+    if (m_driverController.isConnected() && !m_operatorController.isConnected()) {
+      System.err.println("⚠️ HINT: Only driver controller detected. Check operator controller connection!");
+    }
   }
 
   /**

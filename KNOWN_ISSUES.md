@@ -95,12 +95,18 @@ This document lists known issues, limitations, and things that could break with 
 
 **Impact**: Smooth, controlled acceleration
 
-### 9. No Current Spike Detection
-**Problem**: Can't detect if mechanism is jammed
+### 9. ✅ FIXED - Current Spike Detection
+**Status**: FIXED
 
-**Impact**: Motors could burn out trying to move jammed mechanism
+**Solution Applied**:
+- Current monitoring added to ArmSubsystem (arm & extension motors)
+- Current monitoring added to IntakeSubsystem (intake & roller motors)
+- Threshold: 35A for arm, 25A for intake
+- Duration filter: 10 cycles (~200ms) to avoid false positives
+- Motors automatically stop when sustained current spike detected
+- Current values published to SmartDashboard for monitoring
 
-**Solution**: Monitor motor current in periodic(), stop if exceeds threshold
+**Impact**: Prevents motor burnout from jammed mechanisms
 
 ### 10. Simple Time-Based Autonomous
 **Problem**: Autonomous routines use only timers, no sensor feedback
