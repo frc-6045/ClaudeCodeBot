@@ -12,18 +12,21 @@ This document lists known issues, limitations, and things that could break with 
 **Impact**: HIGH - Robot will not perform well
 
 **Problem**:
-- All PID constants are set to default/placeholder values
-- Arm will likely oscillate or not reach targets properly
+- All PID constants are set to safe default values (P=0.1)
+- Arm will likely be sluggish or not reach targets properly
 - Climber PID also needs tuning
 - These MUST be tuned for your specific robot
 
-**Solution**:
-- Follow [TUNING_GUIDE.md](TUNING_GUIDE.md) carefully
-- Start with small P values and increase gradually
-- Test in safe environment before competition
-- Update Constants.java with tuned values
+**Solution** - NOW EASIER WITH LIVE TUNING:
+- Use **Live PID Tuning** via SmartDashboard - no code redeployment needed!
+- See [LIVE_PID_TUNING.md](LIVE_PID_TUNING.md) for complete walkthrough
+- Adjust values in SmartDashboard, see results instantly
+- Save final values to Constants.java when done
+- Also see [TUNING_GUIDE.md](TUNING_GUIDE.md) for theory
 
-**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java)
+**Estimated time**: 30-60 minutes with live tuning (was 1-2 hours)
+
+**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java) (after finding values)
 
 ---
 

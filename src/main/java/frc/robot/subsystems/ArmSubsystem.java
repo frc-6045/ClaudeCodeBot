@@ -105,6 +105,17 @@ public class ArmSubsystem extends SubsystemBase {
 
     // Reset encoders
     resetEncoders();
+
+    // Publish PID values to SmartDashboard for live tuning
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/PID/kP", ArmConstants.kArmP);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/PID/kI", ArmConstants.kArmI);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/PID/kD", ArmConstants.kArmD);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/PID/kFF", ArmConstants.kArmFF);
+
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Extension/PID/kP", ArmConstants.kExtensionP);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Extension/PID/kI", ArmConstants.kExtensionI);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Extension/PID/kD", ArmConstants.kExtensionD);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Extension/PID/kFF", ArmConstants.kExtensionFF);
   }
 
   /**
@@ -386,6 +397,29 @@ public class ArmSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Live PID tuning from SmartDashboard
+    // Read values from dashboard and update PID controllers if changed
+    double armP = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Arm/PID/kP", ArmConstants.kArmP);
+    double armI = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Arm/PID/kI", ArmConstants.kArmI);
+    double armD = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Arm/PID/kD", ArmConstants.kArmD);
+    double armFF = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Arm/PID/kFF", ArmConstants.kArmFF);
+
+    double extP = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Extension/PID/kP", ArmConstants.kExtensionP);
+    double extI = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Extension/PID/kI", ArmConstants.kExtensionI);
+    double extD = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Extension/PID/kD", ArmConstants.kExtensionD);
+    double extFF = edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Extension/PID/kFF", ArmConstants.kExtensionFF);
+
+    // Update PID controllers
+    m_armPIDController.setP(armP);
+    m_armPIDController.setI(armI);
+    m_armPIDController.setD(armD);
+    m_armPIDController.setFF(armFF);
+
+    m_extensionPIDController.setP(extP);
+    m_extensionPIDController.setI(extI);
+    m_extensionPIDController.setD(extD);
+    m_extensionPIDController.setFF(extFF);
+
     // Safety check - if arm goes out of bounds, stop it
     if (!isWithinLimits() && m_isHomed) {
       System.err.println("WARNING: Arm exceeded safe limits! Stopping motors.");
