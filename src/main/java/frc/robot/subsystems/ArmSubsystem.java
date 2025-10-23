@@ -296,5 +296,12 @@ public class ArmSubsystem extends SubsystemBase {
       System.err.println("WARNING: Arm exceeded safe limits! Stopping motors.");
       stop();
     }
+
+    // Telemetry
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Angle Position", getArmPosition());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Arm/Extension Position", getExtensionPosition());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Arm/Is Homed", m_isHomed);
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Arm/Within Limits", isWithinLimits());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Arm/Target Position", m_targetPosition.name());
   }
 }

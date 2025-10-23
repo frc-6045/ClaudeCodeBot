@@ -114,5 +114,9 @@ public class IntakeSubsystem extends SubsystemBase {
     if (m_currentState == IntakeState.INTAKING && hasGamePiece()) {
       hold();
     }
+
+    // Telemetry
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Intake/Has Game Piece", hasGamePiece());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putString("Intake/State", m_currentState.name());
   }
 }

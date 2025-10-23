@@ -100,6 +100,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_odometry.update(
         Rotation2d.fromDegrees(-m_gyro.getAngle()),
         getModulePositions());
+
+    // Telemetry - publish to SmartDashboard for debugging
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Swerve/Gyro Angle", getHeading());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Swerve/Robot X", getPose().getX());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putNumber("Swerve/Robot Y", getPose().getY());
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putBoolean("Swerve/Gyro Connected", m_gyro.isConnected());
   }
 
   /**

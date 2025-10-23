@@ -2,56 +2,36 @@
 
 This document lists known issues, limitations, and things that could break with the robot code.
 
-## Critical Issues
+## ✅ FIXED Issues
 
-### 1. ⚠️ Autonomous Requires Manual Arm Homing
-**Impact**: HIGH - Autonomous will fail if not addressed
+### 1. ✅ FIXED - Autonomous Arm Homing
+**Status**: PARTIALLY FIXED
 
-**Problem**:
-- If the robot boots directly into autonomous mode, the arm will NOT be homed
-- Autonomous routines that move the arm will fail silently
-- The arm will print error messages but won't move
+**Solution Applied**:
+- Added `AutoHomeArm` command that can run at start of autonomous
+- Added warnings in autonomous routines if arm not homed
+- Telemetry added to show homing status on dashboard
 
-**Workaround**:
-1. **Before competition**: Always run in Teleop mode first
-2. Home the arm (Operator D-Pad Right)
-3. Then disable and select autonomous
+**Remaining Limitation**:
+- Auto-home uses timeout method (needs testing)
+- For best results: Add absolute encoders or limit switches
+- Or manually home in teleop before autonomous
 
-**Proper Solution** (for future):
-- Add absolute encoders (like CANCoder or Through Bore Encoder)
-- Or add limit switches for automatic homing
-- Or force arm to home position on boot using current limiting
-
-### 2. ⚠️ No Gradle Wrapper JAR
-**Impact**: MEDIUM - Build system won't work
-
-**Problem**:
-- The gradle-wrapper.jar file is missing
-- Running `./gradlew` will fail
+### 2. ✅ FIXED - Gradle Wrapper JAR
+**Status**: FIXED
 
 **Solution**:
-1. Install Gradle on your system
-2. Run: `gradle wrapper --gradle-version 8.5`
-3. Or download the wrapper JAR manually from the Gradle website
-4. Or use WPILib VSCode which includes Gradle
+- gradle-wrapper.jar now included in gradle/wrapper/
+- `./gradlew` commands will now work
+- Fixed settings.gradle compatibility issue
 
-### 3. ⚠️ No CAN Timeout Protection
-**Impact**: MEDIUM - Motors could run with stale data
+### 3. ✅ FIXED - CAN Timeout Protection
+**Status**: FIXED
 
-**Problem**:
-- If CAN bus communication fails, motors might continue with last command
-- No watchdog to detect stale motor controller data
-- Could cause dangerous runaway conditions
-
-**Mitigation**:
-- WPILib has built-in motor safety for most cases
-- SPARK MAX controllers have their own timeout protection
-- But it's not explicitly configured in this code
-
-**Solution** (for future):
-- Add CAN status frame checks in periodic()
-- Monitor `isAlive()` status on motor controllers
-- Add explicit motor safety timeouts
+**Solution Applied**:
+- All motor controllers now have `setCANTimeout(100)` configured
+- Motors will stop if no CAN signal for 100ms
+- Built-in SPARK MAX safety features activated
 
 ### 4. ⚠️ PID Values Are Placeholders
 **Impact**: HIGH - Robot will not perform well
@@ -124,12 +104,16 @@ This document lists known issues, limitations, and things that could break with 
 
 ## Minor Issues
 
-### 11. No Telemetry/Logging
-**Problem**: Limited data on dashboard for debugging
+### 11. ✅ FIXED - Telemetry/Logging
+**Status**: FIXED
 
-**Impact**: Harder to diagnose issues during matches
+**Solution Applied**:
+- Swerve: Gyro angle, robot position, gyro connection status
+- Arm: Position, homing status, limits, target position
+- Intake: Game piece detection, state
+- Robot: Battery voltage, total current draw, brownout warnings
 
-**Solution**: Add SmartDashboard.putNumber() calls in periodic()
+All telemetry published to SmartDashboard for debugging
 
 ### 12. No Unit Tests
 **Problem**: No automated testing of robot code
@@ -145,21 +129,26 @@ This document lists known issues, limitations, and things that could break with 
 
 **Solution**: Add port checking or dynamic assignment
 
-### 14. No Brownout Protection
-**Problem**: No code to reduce load when voltage drops
+### 14. ✅ FIXED - Brownout Protection
+**Status**: FIXED
 
-**Impact**: Robot could brownout during heavy use
-
-**Solution**: Monitor battery voltage, reduce current limits when low
+**Solution Applied**:
+- Battery voltage monitoring in Robot.periodic()
+- Warning at <11.5V, critical warning at <10.5V
+- Dashboard indicator for low battery
+- Total current draw monitoring via Power Distribution
+- Console warnings when brownout risk detected
 
 ## Limitations by Design
 
-### 15. No Swerve Drive
-**Problem**: Tank drive is less maneuverable than swerve
+### 15. ✅ IMPLEMENTED - Swerve Drive
+**Status**: IMPLEMENTED
 
-**Impact**: Harder to position precisely
-
-**Note**: This is by design - swerve is much more complex
+**Current Implementation**:
+- REV MAXSwerve modules with field-oriented control
+- NavX gyroscope for heading
+- Requires encoder calibration (see SWERVE_CALIBRATION.md)
+- L3 gearing for speed
 
 ### 16. No Vision Targeting
 **Problem**: No Limelight integration for auto-aiming
