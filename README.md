@@ -95,12 +95,24 @@ src/main/java/frc/robot/
 
 All robot constants are defined in [Constants.java](src/main/java/frc/robot/Constants.java):
 - Motor CAN IDs
-- PID constants (MUST BE TUNED - see TUNING_GUIDE.md)
+- PID constants (MUST BE TUNED - see guides below)
 - Position setpoints (MUST BE CALIBRATED for your robot)
 - Current limits
 - Controller deadbands
 
-**See [TUNING_GUIDE.md](TUNING_GUIDE.md) for detailed setup and tuning instructions!**
+### 🎛️ **NEW: Live PID Tuning!**
+This robot supports **live PID tuning** via SmartDashboard - no code redeployment needed!
+
+- Adjust PID values in SmartDashboard and see results instantly
+- Makes tuning 2-3x faster than traditional methods
+- Perfect for students learning PID control
+- See **[LIVE_PID_TUNING.md](LIVE_PID_TUNING.md)** for complete guide
+
+### Calibration Guides
+1. **[CALIBRATION_GUIDE.md](CALIBRATION_GUIDE.md)** ⭐ Start here! Complete setup walkthrough
+2. **[LIVE_PID_TUNING.md](LIVE_PID_TUNING.md)** - Live PID tuning via SmartDashboard
+3. **[TUNING_GUIDE.md](TUNING_GUIDE.md)** - Traditional PID tuning theory
+4. **[SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md)** - Swerve encoder offset calibration
 
 ## Building and Deploying
 
