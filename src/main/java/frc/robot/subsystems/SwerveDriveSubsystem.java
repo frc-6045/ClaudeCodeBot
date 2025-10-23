@@ -187,6 +187,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get average distance traveled by all swerve modules
+   * Useful for encoder-based autonomous driving
+   *
+   * @return Average distance in meters
+   */
+  public double getAverageDistance() {
+    double fl = Math.abs(m_frontLeft.getDrivePosition());
+    double fr = Math.abs(m_frontRight.getDrivePosition());
+    double bl = Math.abs(m_backLeft.getDrivePosition());
+    double br = Math.abs(m_backRight.getDrivePosition());
+
+    return (fl + fr + bl + br) / 4.0;
+  }
+
+  /**
    * Zeroes the heading of the robot (makes current direction "forward")
    */
   public void zeroHeading() {

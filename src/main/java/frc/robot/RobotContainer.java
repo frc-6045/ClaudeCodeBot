@@ -220,20 +220,21 @@ public class RobotContainer {
 
   /**
    * Simple autonomous - just drive forward to leave community
+   * Uses encoder-based distance control for reliability
    *
    * @return the command to run in autonomous
    */
   public Command getLeaveAuto() {
     return Commands.sequence(
         Commands.runOnce(() -> m_drive.resetEncoders()),
-        Commands.run(() -> m_drive.drive(0.5, 0, 0, false), m_drive) // Drive forward
-            .withTimeout(3.0),
+        new DriveDistance(m_drive, 3.0, 0.5), // Drive 3 meters forward at 50% speed
         Commands.runOnce(() -> m_drive.stop(), m_drive)
     );
   }
 
   /**
    * Score preloaded coral and leave community
+   * Uses encoder-based drive and arm position feedback
    * WARNING: Arm must be manually homed before running autonomous!
    *
    * @return the command to run in autonomous
@@ -256,16 +257,16 @@ public class RobotContainer {
         // Stow arm
         ArmCommands.stow(m_arm),
 
-        // Drive backwards to leave community
+        // Drive backwards to leave community (encoder-based)
         Commands.runOnce(() -> m_drive.resetEncoders()),
-        Commands.run(() -> m_drive.drive(-0.5, 0, 0, false), m_drive) // Drive backward
-            .withTimeout(3.0),
+        new DriveDistance(m_drive, -3.0, 0.5), // Drive 3 meters backward at 50% speed
         Commands.runOnce(() -> m_drive.stop(), m_drive)
     );
   }
 
   /**
    * Score preloaded coral, pick up another, and score again
+   * Uses encoder-based drive for consistent positioning
    * WARNING: Arm must be manually homed before running autonomous!
    *
    * @return the command to run in autonomous
@@ -286,16 +287,16 @@ public class RobotContainer {
         // Move arm to intake position
         ArmCommands.intakePosition(m_arm),
 
-        // Drive to game piece
-        Commands.run(() -> m_drive.drive(0.5, 0, 0, false), m_drive)
-            .withTimeout(2.0),
+        // Drive to game piece (encoder-based)
+        Commands.runOnce(() -> m_drive.resetEncoders()),
+        new DriveDistance(m_drive, 2.0, 0.5), // Drive 2 meters forward
 
         // Intake game piece
         IntakeCommands.intakeUntilDetected(m_intake),
 
-        // Drive back
-        Commands.run(() -> m_drive.drive(-0.5, 0, 0, false), m_drive)
-            .withTimeout(2.0),
+        // Drive back (encoder-based)
+        Commands.runOnce(() -> m_drive.resetEncoders()),
+        new DriveDistance(m_drive, -2.0, 0.5), // Drive 2 meters backward
 
         // Score second piece
         ArmCommands.moveToPosition(m_arm, ArmPosition.LEVEL_2, 20),

@@ -257,6 +257,24 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get current draw from arm motor
+   *
+   * @return Current in Amps
+   */
+  public double getArmCurrent() {
+    return m_armMotor.getOutputCurrent();
+  }
+
+  /**
+   * Get current draw from extension motor
+   *
+   * @return Current in Amps
+   */
+  public double getExtensionCurrent() {
+    return m_extensionMotor.getOutputCurrent();
+  }
+
+  /**
    * Check if arm is at target position
    *
    * @param tolerance Acceptable error in encoder ticks
