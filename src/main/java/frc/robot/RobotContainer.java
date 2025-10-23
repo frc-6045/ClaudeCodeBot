@@ -144,6 +144,10 @@ public class RobotContainer {
     new JoystickButton(m_driverController, XboxController.Button.kStart.value)
         .onTrue(Commands.runOnce(() -> m_drive.setX(), m_drive));
 
+    // Back button - Print swerve calibration offsets (for setup)
+    new JoystickButton(m_driverController, XboxController.Button.kBack.value)
+        .onTrue(new PrintSwerveOffsets(m_drive));
+
     // ===== OPERATOR CONTROLS =====
 
     // A button - Arm to intake position
@@ -202,6 +206,9 @@ public class RobotContainer {
           m_arm.home();
           System.out.println("ARM HOMED - Encoders reset, arm ready for use");
         }, m_arm));
+
+    new Trigger(() -> m_operatorController.getPOV() == 270) // Left - Record current position for calibration
+        .onTrue(new RecordArmPosition(m_arm, "CURRENT"));
   }
 
   /**

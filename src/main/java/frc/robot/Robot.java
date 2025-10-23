@@ -37,6 +37,22 @@ public class Robot extends TimedRobot {
       System.err.println("   Check Power Distribution Hub connection.");
       e.printStackTrace();
     }
+
+    // Print helpful startup banner
+    System.out.println("");
+    System.out.println("==================================================");
+    System.out.println("🤖 FRC Team 6045 - 2025 Reefscape Robot");
+    System.out.println("==================================================");
+    System.out.println("✅ Robot initialized successfully");
+    System.out.println("");
+    System.out.println("📋 CALIBRATION HELPERS:");
+    System.out.println("  Driver Back: Print swerve calibration offsets");
+    System.out.println("  Operator D-Pad Left: Record current arm position");
+    System.out.println("  Operator D-Pad Right: Home arm manually");
+    System.out.println("");
+    System.out.println("⚠️  REMEMBER: Home arm (D-Pad Right) before using!");
+    System.out.println("==================================================");
+    System.out.println("");
   }
 
   @Override

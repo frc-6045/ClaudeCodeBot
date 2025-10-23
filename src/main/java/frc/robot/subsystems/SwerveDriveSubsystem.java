@@ -241,6 +241,21 @@ public class SwerveDriveSubsystem extends SubsystemBase {
   }
 
   /**
+   * Get current states of all swerve modules
+   * Useful for calibration and debugging
+   *
+   * @return Array of module states [FL, FR, BL, BR]
+   */
+  public SwerveModuleState[] getModuleStates() {
+    return new SwerveModuleState[] {
+      m_frontLeft.getState(),
+      m_frontRight.getState(),
+      m_backLeft.getState(),
+      m_backRight.getState()
+    };
+  }
+
+  /**
    * Stop all swerve modules
    */
   public void stop() {
