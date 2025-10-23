@@ -134,6 +134,10 @@ public final class Constants {
     public static final double kMinArmPosition = -10; // Minimum safe angle
     public static final double kMaxArmPosition = 500; // Maximum safe angle
 
+    // Collision detection limits - when arm is extended
+    public static final double kMinArmPositionExtended = 50; // Don't go too low when extended
+    public static final double kMaxArmPositionExtended = 450; // Don't go too high when extended
+
     // Smart Motion constraints (encoder units per second)
     public static final double kMaxArmVelocity = 2000;
     public static final double kMaxArmAcceleration = 1500;

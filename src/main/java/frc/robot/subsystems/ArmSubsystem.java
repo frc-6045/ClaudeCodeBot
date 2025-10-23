@@ -102,13 +102,19 @@ public class ArmSubsystem extends SubsystemBase {
   }
 
   /**
-   * Set the arm to a predefined position (with safety checks)
+   * Set the arm to a predefined position (with safety checks and collision detection)
    *
    * @param position The target position
    */
   public void setPosition(ArmPosition position) {
     if (!m_isHomed) {
       System.err.println("WARNING: Arm not homed! Cannot safely move to position.");
+      return;
+    }
+
+    // Check for collisions before moving
+    if (!isPositionSafe(position.armAngle, position.extension)) {
+      System.err.println("WARNING: Position " + position.name() + " would cause collision! Command rejected.");
       return;
     }
 
@@ -274,6 +280,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   /**
    * Check if arm is within safe operating limits
+   * Includes collision detection with robot frame
    *
    * @return true if arm position is safe
    */
@@ -281,12 +288,48 @@ public class ArmSubsystem extends SubsystemBase {
     double armPos = getArmPosition();
     double extPos = getExtensionPosition();
 
+    // Single-axis limits
     boolean armSafe = armPos >= ArmConstants.kMinArmPosition &&
                       armPos <= ArmConstants.kMaxArmPosition;
     boolean extSafe = extPos >= ArmConstants.kRetractedPosition &&
                       extPos <= ArmConstants.kMaxExtensionPosition;
 
-    return armSafe && extSafe;
+    // Collision detection: If extended, limit arm angle to prevent frame collision
+    boolean collisionSafe = true;
+    if (extPos > ArmConstants.kRetractedPosition + 100) { // If significantly extended
+      // Limit arm to safe angles when extended
+      collisionSafe = armPos >= ArmConstants.kMinArmPositionExtended &&
+                      armPos <= ArmConstants.kMaxArmPositionExtended;
+    }
+
+    return armSafe && extSafe && collisionSafe;
+  }
+
+  /**
+   * Check if a target position would be safe (collision detection)
+   *
+   * @param targetArmPos Target arm position
+   * @param targetExtPos Target extension position
+   * @return true if the position is safe
+   */
+  public boolean isPositionSafe(double targetArmPos, double targetExtPos) {
+    // Check single-axis limits
+    if (targetArmPos < ArmConstants.kMinArmPosition || targetArmPos > ArmConstants.kMaxArmPosition) {
+      return false;
+    }
+    if (targetExtPos < ArmConstants.kRetractedPosition || targetExtPos > ArmConstants.kMaxExtensionPosition) {
+      return false;
+    }
+
+    // Check collision: If extended, limit arm angle
+    if (targetExtPos > ArmConstants.kRetractedPosition + 100) {
+      if (targetArmPos < ArmConstants.kMinArmPositionExtended ||
+          targetArmPos > ArmConstants.kMaxArmPositionExtended) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   @Override
