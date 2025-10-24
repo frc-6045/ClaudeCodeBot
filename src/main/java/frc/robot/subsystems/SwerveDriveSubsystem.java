@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,9 +13,11 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.PathPlannerConfig;
 
 /**
  * Swerve drive subsystem using REV MAXSwerve modules
@@ -96,6 +101,40 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         e.printStackTrace();
       }
     }).start();
+
+    // Configure PathPlanner AutoBuilder for autonomous path following
+    configurePathPlanner();
+  }
+
+  /**
+   * Configure PathPlanner's AutoBuilder for autonomous path following
+   */
+  private void configurePathPlanner() {
+    try {
+      RobotConfig config = PathPlannerConfig.createRobotConfig();
+      PPHolonomicDriveController controller = PathPlannerConfig.createHolonomicController();
+
+      AutoBuilder.configure(
+        this::getPose,                    // Supplier of current robot pose
+        this::resetOdometry,              // Consumer to reset odometry
+        this::getChassisSpeeds,           // Supplier of current robot-relative ChassisSpeeds
+        this::driveRobotRelative,         // Consumer of ChassisSpeeds to drive the robot
+        controller,                       // Holonomic drive controller
+        config,                           // Robot configuration
+        () -> {
+          // Mirror paths if on red alliance
+          var alliance = DriverStation.getAlliance();
+          return alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red;
+        },
+        this                              // Subsystem requirements
+      );
+
+      System.out.println("✓ PathPlanner AutoBuilder configured");
+    } catch (Exception e) {
+      System.err.println("⚠️ WARNING: PathPlanner configuration failed: " + e.getMessage());
+      System.err.println("   Path following will not be available!");
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -273,5 +312,42 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     m_backLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     m_backRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  }
+
+  /**
+   * Get current chassis speeds (for PathPlanner)
+   *
+   * @return Current robot-relative chassis speeds
+   */
+  public ChassisSpeeds getChassisSpeeds() {
+    return m_kinematics.toChassisSpeeds(getModuleStates());
+  }
+
+  /**
+   * Drive using robot-relative chassis speeds (for PathPlanner)
+   *
+   * @param speeds Robot-relative chassis speeds
+   */
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    // Convert chassis speeds to module states
+    SwerveModuleState[] moduleStates = m_kinematics.toSwerveModuleStates(speeds);
+
+    // Normalize wheel speeds
+    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+
+    // Set each module state
+    m_frontLeft.setDesiredState(moduleStates[0]);
+    m_frontRight.setDesiredState(moduleStates[1]);
+    m_backLeft.setDesiredState(moduleStates[2]);
+    m_backRight.setDesiredState(moduleStates[3]);
+  }
+
+  /**
+   * Get the swerve drive kinematics
+   *
+   * @return Kinematics object
+   */
+  public SwerveDriveKinematics getKinematics() {
+    return m_kinematics;
   }
 }
