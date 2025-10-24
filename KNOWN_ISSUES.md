@@ -15,6 +15,7 @@ This document lists known issues, limitations, and things that could break with 
 - All PID constants are set to safe default values (P=0.1)
 - Arm will likely be sluggish or not reach targets properly
 - Climber PID also needs tuning
+- PathPlanner PID values need tuning
 - These MUST be tuned for your specific robot
 
 **Solution** - NOW EASIER WITH LIVE TUNING:
@@ -26,136 +27,51 @@ This document lists known issues, limitations, and things that could break with 
 
 **Estimated time**: 30-60 minutes with live tuning (was 1-2 hours)
 
-**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java) (after finding values)
+**Files to modify**:
+- [Constants.java](src/main/java/frc/robot/Constants.java) (after finding values)
+- [PathPlannerConfig.java](src/main/java/frc/robot/PathPlannerConfig.java) (for autonomous)
 
 ---
 
-### 2. ✅ FIXED - Helper Commands for Position Calibration
-**Status**: FIXED
+### 2. Position Setpoints Need Calibration
+**Impact**: HIGH - Arm movements won't work correctly
 
-**What was improved**:
-- Created `RecordArmPosition` command to easily capture encoder values
-- Bound to **Operator D-Pad Left** for quick access during testing
-- Command prints formatted output directly to console AND SmartDashboard
-- Shows exact Constants.java code to copy/paste
-- No more guessing - just move arm to position and press button!
+**Problem**:
+- Encoder values for scoring positions are placeholder values
+- Your robot's geometry will be different
+- Arm could move to wrong positions or crash into itself
+- Swerve module offsets need calibration
 
-**How to use**:
-1. Move arm manually (D-Pad Up/Down) to desired position
-2. Press **Operator D-Pad Left** to record values
-3. Copy the printed Constants.java code from console
-4. Update [Constants.java](src/main/java/frc/robot/Constants.java)
+**Solution** - NOW EASIER WITH HELPER COMMANDS:
+- Use **Operator D-Pad Left** to record arm positions (prints code to copy/paste)
+- Use **Driver Back button** to print swerve offsets (prints code to copy/paste)
+- Follow [SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md) for swerve
+- Follow [CALIBRATION_GUIDE.md](CALIBRATION_GUIDE.md) for complete walkthrough
 
-**Note**: Position values still need to be calibrated for your specific robot, but now it's MUCH easier!
-
----
-
-### 3. ✅ FIXED - Helper Command for Swerve Calibration
-**Status**: FIXED
-
-**What was improved**:
-- Created `PrintSwerveOffsets` command to print encoder offsets
-- Bound to **Driver Back button** for easy access
-- Command prints formatted output to console AND SmartDashboard
-- Shows exact Constants.java code to copy/paste
-- Follow [SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md) for full walkthrough
-
-**How to use**:
-1. Manually rotate all wheels to point straight forward
-2. Press **Driver Back button** to print offsets
-3. Copy the printed Constants.java code from console
-4. Update [Constants.java](src/main/java/frc/robot/Constants.java)
-
-**Note**: Offsets still need to be measured, but the helper makes it trivial!
+**Files to modify**: [Constants.java](src/main/java/frc/robot/Constants.java)
 
 ---
 
-## MEDIUM Priority - Optional Improvements
+### 3. Vision Constants Need Calibration
+**Impact**: MEDIUM - Vision targeting won't work accurately
 
-(All items in this section have been fixed! See "What's Already Fixed ✅" section below.)
+**Problem**:
+- Limelight mount height and angle are placeholder values
+- Target height is an estimate
+- Vision subsystem is implemented but not wired into RobotContainer
+- Auto-aim won't be accurate without proper calibration
 
----
+**Solution**:
+1. Measure actual Limelight height from floor
+2. Measure Limelight mount angle
+3. Measure target height
+4. Update VisionConstants in Constants.java
+5. Wire VisionSubsystem into RobotContainer
+6. Bind vision commands to controller buttons
 
-## LOW Priority - Nice to Have
-
-### 6. ✅ FIXED - Unit Tests Added
-**Status**: FIXED
-
-**What was improved**:
-- Created comprehensive unit tests for Constants validation
-- Added tests for DriveDistance command logic
-- Tests validate CAN IDs, current limits, PID constants, speed limits
-- JUnit already configured in build.gradle
-- Run tests with: `./gradlew test`
-
-**Location**: [src/test/java/frc/robot/](src/test/java/frc/robot/)
-
----
-
-### 7. ✅ FIXED - Limelight Vision Targeting Implemented
-**Status**: FIXED
-
-**What was improved**:
-- Created `VisionSubsystem` with full Limelight integration
-- Auto-aim, distance calculation, target detection
-- Vision-assisted driving commands
-- LED control to save battery
-- Helper methods: `isAligned()`, `getDistanceToTarget()`, `getSteeringAdjustment()`
-
-**Location**:
-- [VisionSubsystem.java](src/main/java/frc/robot/subsystems/VisionSubsystem.java)
-- [VisionCommands.java](src/main/java/frc/robot/commands/VisionCommands.java)
-
-**Note**: Needs to be wired into RobotContainer and Limelight height/angle calibrated for your robot
-
----
-
-### 8. ✅ FIXED - PathPlanner Integration Complete
-**Status**: FIXED
-
-**What was improved**:
-- PathPlanner library added to vendordeps
-- `PathPlannerConfig` class for holonomic drive configuration
-- AutoBuilder fully configured in SwerveDriveSubsystem
-- Automatic red alliance path mirroring
-- `PathPlannerCommands` factory for easy path following
-- Ready for complex autonomous routines!
-
-**Location**:
-- [PathPlannerConfig.java](src/main/java/frc/robot/PathPlannerConfig.java)
-- [PathPlannerCommands.java](src/main/java/frc/robot/commands/PathPlannerCommands.java)
-- [vendordeps/PathplannerLib.json](vendordeps/PathplannerLib.json)
-
-**How to use**:
-1. Download PathPlanner GUI app
-2. Create paths and autos in GUI
-3. Deploy paths to robot
-4. Use `PathPlannerCommands.followPath("pathName")` in autonomous
-
-**Note**: PID values in PathPlannerConfig will need tuning for your robot
-
----
-
-### 9. ✅ FIXED - Auto-Homing with Current Detection
-**Status**: FIXED
-
-**What was improved**:
-- `AutoHomeArm` command uses current spike detection
-- Monitors motor current to detect mechanical hard stop
-- 5-cycle confirmation (100ms) prevents false positives
-- 5-second timeout as safety fallback
-- Perfect for autonomous - no operator needed!
-- Can be used in autonomous init to auto-home the arm
-
-**Location**: [AutoHomeArm.java](src/main/java/frc/robot/commands/AutoHomeArm.java)
-
-**How to use**:
-```java
-// In autonomous init or at start of auto routine
-new AutoHomeArm(m_arm)
-```
-
-**Note**: Current threshold (15A) may need tuning based on your arm's mechanical resistance
+**Files to modify**:
+- [Constants.java](src/main/java/frc/robot/Constants.java) (VisionConstants section)
+- [RobotContainer.java](src/main/java/frc/robot/RobotContainer.java) (add vision bindings)
 
 ---
 
@@ -284,7 +200,7 @@ If you encounter an issue not listed here:
 
 ## What's Already Fixed ✅
 
-All critical safety and configuration issues have been resolved:
+### Critical Safety & Configuration
 - ✅ All 14 motor controllers properly configured (CAN timeout, voltage comp, brake mode)
 - ✅ Current spike detection (prevents motor burnout)
 - ✅ Collision detection for arm (prevents frame crashes)
@@ -294,6 +210,15 @@ All critical safety and configuration issues have been resolved:
 - ✅ Manual arm control safety limits
 - ✅ Null pointer safety in autonomous
 - ✅ Comprehensive telemetry
+
+### Advanced Features Added
+- ✅ **Unit Tests** - Comprehensive test suite for Constants and commands ([src/test/](src/test/java/frc/robot/))
+- ✅ **Limelight Vision** - Full vision targeting subsystem with auto-aim ([VisionSubsystem.java](src/main/java/frc/robot/subsystems/VisionSubsystem.java))
+- ✅ **PathPlanner Integration** - Complex autonomous path following ([PathPlannerConfig.java](src/main/java/frc/robot/PathPlannerConfig.java))
+- ✅ **Auto-Homing** - Automatic arm homing with current detection ([AutoHomeArm.java](src/main/java/frc/robot/commands/AutoHomeArm.java))
+- ✅ **Encoder-Based Driving** - Autonomous uses encoder feedback, not time-based ([DriveDistance.java](src/main/java/frc/robot/commands/DriveDistance.java))
+- ✅ **Live PID Tuning** - Tune PID values via SmartDashboard without redeploying
+- ✅ **Calibration Helpers** - One-button commands to record positions and offsets
 
 See [CODE_REVIEW_FINDINGS.md](CODE_REVIEW_FINDINGS.md) for complete list of fixes.
 
