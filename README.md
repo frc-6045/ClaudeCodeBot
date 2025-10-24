@@ -184,11 +184,16 @@ This robot supports **live PID tuning** via SmartDashboard - no code redeploymen
 
 ## Documentation
 
-- **[QUICK_START.md](QUICK_START.md)** - First-time setup guide (start here!)
-- **[SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md)** - ⚙️ **CRITICAL**: Swerve module calibration (do this first!)
-- **[TUNING_GUIDE.md](TUNING_GUIDE.md)** - PID tuning and calibration instructions
-- **[KNOWN_ISSUES.md](KNOWN_ISSUES.md)** - ⚠️ Important limitations and potential problems
-- **[FIXES_APPLIED.md](FIXES_APPLIED.md)** - List of safety fixes and improvements
+### Setup & Calibration (Start Here!)
+1. **[CALIBRATION_GUIDE.md](CALIBRATION_GUIDE.md)** ⭐ - Complete setup walkthrough (start here!)
+2. **[LIVE_PID_TUNING.md](LIVE_PID_TUNING.md)** - Live PID tuning via SmartDashboard
+3. **[SWERVE_CALIBRATION.md](SWERVE_CALIBRATION.md)** - Swerve module calibration
+4. **[TUNING_GUIDE.md](TUNING_GUIDE.md)** - Traditional PID tuning theory
+
+### Reference
+- **[KNOWN_ISSUES.md](KNOWN_ISSUES.md)** - Remaining calibration items
+- **[CODE_REVIEW_FINDINGS.md](CODE_REVIEW_FINDINGS.md)** - What was fixed and improved
+- **[AUTO_PUSH_ENABLED.md](AUTO_PUSH_ENABLED.md)** - Git auto-push documentation
 
 ## License
 
